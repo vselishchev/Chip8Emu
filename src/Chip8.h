@@ -26,7 +26,11 @@ private:
     void Op3xkk(); // Skip next instruction if register Vx equal to kk.
     void Op4xkk(); // Skip next instruction if register Vx not equal to kk.
     void Op5xy0(); // Skip next instruction if register Vx equal to register Vy.
-
+    void Op6xkk(); // Set the register Vx to the value kk;
+    void Op7xkk(); // Add value to the register Vx;
+    void Op8xy0(); // Set the register Vx to the value of the register Vy;
+    void Op8xy1(); // Set register Vx to Vx OR Vy;
+      
 private:
     unsigned char registers[16];
     unsigned char memory[4096];

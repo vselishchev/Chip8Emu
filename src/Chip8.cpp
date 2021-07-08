@@ -113,4 +113,36 @@ void Chip8::Op5xy0()
     }
 }
 
+void Chip8::Op6xkk()
+{
+    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    unsigned char value = opcode & 0x00FFu;
+
+    registers[Vx] = value;
+}
+
+void Chip8::Op7xkk()
+{
+    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    unsigned char value = opcode & 0x00FFu;
+
+    registers[Vx] += value;
+}
+
+void Chip8::Op8xy0()
+{
+    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    registers[Vx] = registers[Vy];
+}
+
+void Chip8::Op8xy1()
+{
+    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    registers[Vx] |= registers[Vy];
+}
+
 } // namespace Chip8
