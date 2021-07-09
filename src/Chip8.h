@@ -30,7 +30,17 @@ private:
     void Op7xkk(); // Add value to the register Vx;
     void Op8xy0(); // Set the register Vx to the value of the register Vy;
     void Op8xy1(); // Set register Vx to Vx OR Vy;
-      
+    void Op8xy2(); // Set register Vx to Vx AND Vy;
+    void Op8xy3(); // Set register Vx to Vx XOR Vy;
+    void Op8xy4(); // Add registers Vx and Vy with carry;
+    void Op8xy5(); // Subtract register Vy from register Vx, set flag register to NOT borrow;
+    void Op8xy6(); // Right shift of the register Vx. If least-significant bit is 1 - set flag register to 1;
+    void Op8xy7(); // Subtract register Vx from register Vy and store in register Vx. Set flag register to NOT bororow;
+    void Op8xyE(); // Left shift of the register Vx. If most-significant bit is 1 - set flag register to 1;
+    void Op9xy0(); // Skip next instruction if register Vx not equal register Vy.
+    void OpAnnn(); // Set index to nnn.
+    void OpBnnn(); // Jump to location nnn + V0;
+    
 private:
     unsigned char registers[16];
     unsigned char memory[4096];

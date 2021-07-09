@@ -82,8 +82,8 @@ void Chip8::Op2nnn()
 
 void Chip8::Op3xkk()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u; // Get the register index;
-    unsigned char value = opcode & 0x00FFu;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u; // Get the register index;
+    const unsigned char value = opcode & 0x00FFu;
 
     if (registers[Vx] == value)
     {
@@ -93,8 +93,8 @@ void Chip8::Op3xkk()
 
 void Chip8::Op4xkk()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u; // Get the register index;
-    unsigned char value = opcode & 0x00FFu;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u; // Get the register index;
+    const unsigned char value = opcode & 0x00FFu;
 
     if (registers[Vx] != value)
     {
@@ -104,8 +104,8 @@ void Chip8::Op4xkk()
 
 void Chip8::Op5xy0()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u; // Get index of the register x;
-    unsigned char Vy = (opcode & 0x00F0u) >> 4u; // Get index of the register y;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u; // Get index of the register x;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u; // Get index of the register y;
 
     if (registers[Vx] == registers[Vy])
     {
@@ -115,34 +115,127 @@ void Chip8::Op5xy0()
 
 void Chip8::Op6xkk()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
-    unsigned char value = opcode & 0x00FFu;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char value = opcode & 0x00FFu;
 
     registers[Vx] = value;
 }
 
 void Chip8::Op7xkk()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
-    unsigned char value = opcode & 0x00FFu;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char value = opcode & 0x00FFu;
 
     registers[Vx] += value;
 }
 
 void Chip8::Op8xy0()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
-    unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
 
     registers[Vx] = registers[Vy];
 }
 
 void Chip8::Op8xy1()
 {
-    unsigned char Vx = (opcode & 0x0F00u) >> 8u;
-    unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
 
     registers[Vx] |= registers[Vy];
+}
+
+void Chip8::Op8xy2()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    registers[Vx] &= registers[Vy];
+}
+
+void Chip8::Op8xy3()
+{ 
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    registers[Vx] ^= registers[Vy];
+}
+
+void Chip8::Op8xy4()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    const unsigned short sum = registers[Vx] + registers[Vy];
+
+    if (sum > 255u)
+    {
+        registers[0xFu] = 1;
+    }
+    else
+    {
+        registers[0xFu] = 0;
+    }
+
+    registers[Vx] = sum & 0xFFu;
+}
+
+void Chip8::Op8xy5()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    registers[0xFu] = registers[Vx] > registers[Vy];
+
+    registers[Vx] -= registers[Vy];    
+}
+
+void Chip8::Op8xy6()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    registers[0xF] = (registers[Vx] & 0x1u);
+    registers[Vx] >>= 1;
+}
+
+void Chip8::Op8xy7()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    registers[0xFu] = registers[Vy] > registers[Vx];
+
+    registers[Vx] = registers[Vy] - registers[Vx];
+}
+
+void Chip8::Op8xyE()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+
+    registers[0xFu] = (registers[Vx] & 0x80u) >> 7u;
+    registers[Vx] <<= 1;
+}
+
+void Chip8::Op9xy0()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+
+    if (registers[Vx] != registers[Vy])
+    {
+        pc += 2;
+    }
+}
+
+void Chip8::OpAnnn()
+{
+    const unsigned short address = opcode & 0x0FFFu;
+    index = address;
+}
+
+void Chip8::OpBnnn()
+{
+    const unsigned short address = opcode & 0x0FFFu;
+    pc = registers[0] + address;
 }
 
 } // namespace Chip8
