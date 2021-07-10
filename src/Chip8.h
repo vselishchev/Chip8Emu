@@ -4,6 +4,8 @@ namespace Chip8
 {
 
 constexpr unsigned int startAddress = 0x200; // Usable memory address starts only from 0x200.
+constexpr unsigned char VideoWidth = 64u;
+constexpr unsigned char VideoHeight = 32u;
 
 class Chip8
 {
@@ -40,7 +42,9 @@ private:
     void Op9xy0(); // Skip next instruction if register Vx not equal register Vy.
     void OpAnnn(); // Set index to nnn.
     void OpBnnn(); // Jump to location nnn + V0;
-    
+    void OpCxkk(); // Set register Vx to random byte and kk.
+    void OpDxyn(); // Draw n-byte sprite starting at memory (Vx, Vy). Set flag register to possible collisiion.
+
 private:
     unsigned char registers[16];
     unsigned char memory[4096];
@@ -52,7 +56,7 @@ private:
     unsigned short pc = startAddress; // Program counter
     unsigned short stack[16];
     unsigned short opcode = 0;
-    unsigned int videoMemory[64 * 32];
+    unsigned int videoMemory[VideoWidth * VideoHeight];
 };
 
 } // namespace Chip8;

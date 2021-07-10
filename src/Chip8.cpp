@@ -3,6 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <cstring>
+#include <chrono>
+#include <random>
 
 namespace Chip8
 {
@@ -236,6 +238,49 @@ void Chip8::OpBnnn()
 {
     const unsigned short address = opcode & 0x0FFFu;
     pc = registers[0] + address;
+}
+
+void Chip8::OpCxkk()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char byte = opcode & 0x00FFu;
+
+    static std::default_random_engine randGen(std::chrono::system_clock::now().time_since_epoch().count());
+	static std::uniform_int_distribution<uint8_t> randByte(0, 255u);
+
+    registers[Vx] = randByte(randGen) & byte;
+}
+
+void Chip8::OpDxyn()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char Vy = (opcode & 0x00F0u) >> 4u;
+    const unsigned char height = opcode & 0x000Fu; // It's always height, since it's guaranteed that the sprite is 8 pixels(bits) wide.
+
+    const unsigned char xPos = registers[Vx] % VideoWidth;
+    const unsigned char yPos = registers[Vy] % VideoHeight;
+
+    registers[0xF] = 0; // nullify flag register before checking for collisions.
+
+    for (unsigned int row = 0; row < height; ++row)
+    {
+        const unsigned char spriteByte = memory[index + row];
+        for (unsigned int column = 0; column < 8; ++column)
+        {
+            const unsigned char spritePixel = spriteByte & (0x80u >> column);
+            unsigned int& screenPixel = videoMemory[(yPos + row) * VideoWidth + (xPos + column) * VideoHeight];
+            if (spritePixel)
+            {
+                if (screenPixel == 0xFFFFFFFFu) // if screen pixel is already on, set collision flag to 1;
+                {
+                    registers[0xF] = 1;
+                }
+
+                screenPixel ^= 0xFFFFFFFFu;
+            }
+        }
+
+    }
 }
 
 } // namespace Chip8
