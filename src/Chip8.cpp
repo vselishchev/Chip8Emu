@@ -36,6 +36,37 @@ Chip8::Chip8()
 
     // Load fonts into the memory
     std::memcpy(memory + FontsetStartAddress, fontset, FontsetSize);
+
+    // Define function pointer table
+    table[0x0] = &Chip8::Table0;
+    table[0x1] = &Chip8::Op1nnn;
+    table[0x2] = &Chip8::Op2nnn;
+    table[0x3] = &Chip8::Op3xkk;
+    table[0x4] = &Chip8::Op4xkk;
+    table[0x5] = &Chip8::Op5xy0;
+    table[0x6] = &Chip8::Op6xkk;
+    table[0x7] = &Chip8::Op7xkk;
+    table[0x8] = &Chip8::Table8;
+    table[0x9] = &Chip8::Op9xy0;
+    table[0xA] = &Chip8::OpAnnn;
+    table[0xB] = &Chip8::OpBnnn;
+    table[0xC] = &Chip8::OpCxkk;
+    table[0xD] = &Chip8::OpDxyn;
+    table[0xE] = &Chip8::TableE;
+    table[0xF] = &Chip8::TableF;
+
+    table0[0x0] = &Chip8::Op00E0;
+    table0[0xE] = &Chip8::Op00EE;
+
+    table8[0x0] = &Chip8::Op8xy0;
+    table8[0x1] = &Chip8::Op8xy1;
+    table8[0x2] = &Chip8::Op8xy2;
+    table8[0x3] = &Chip8::Op8xy3;
+    table8[0x4] = &Chip8::Op8xy4;
+    table8[0x5] = &Chip8::Op8xy5;
+    table8[0x6] = &Chip8::Op8xy6;
+    table8[0x7] = &Chip8::Op8xy7;
+    table8[0xE] = &Chip8::Op8xyE;
 }
 
 void Chip8::LoadROM(const char* filename)
@@ -279,8 +310,152 @@ void Chip8::OpDxyn()
                 screenPixel ^= 0xFFFFFFFFu;
             }
         }
-
     }
+}
+
+void Chip8::OpEx9E()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char key = registers[Vx];
+    if (keypad[key])
+    {
+        pc += 2;
+    }
+}
+
+void Chip8::OpExA1()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char key = registers[Vx];
+    if (!keypad[key])
+    {
+        pc += 2;
+    }
+}
+
+void Chip8::OpFx07()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    registers[Vx] = delayTimer;
+}
+
+void Chip8::OpFx0A()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+
+    // TODO: Think about nicer way of doing this (packaging into int128?).
+    if (keypad[0])
+       registers[0] = 0;
+    else if (keypad[1])
+       registers[1] = 1;
+    else if (keypad[2])
+       registers[2] = 2;
+    else if (keypad[3])
+       registers[3] = 3;
+    else if (keypad[4])
+       registers[4] = 4;
+    else if (keypad[5])
+       registers[5] = 5;
+    else if (keypad[6])
+       registers[6] = 6;
+    else if (keypad[7])
+       registers[7] = 7;
+    else if (keypad[8])
+       registers[8] = 8;
+    else if (keypad[9])
+       registers[9] = 9;
+    else if (keypad[10])
+       registers[10] = 10;
+    else if (keypad[11])
+       registers[11] = 11;
+    else if (keypad[12])
+       registers[12] = 12;
+    else if (keypad[13])
+       registers[13] = 13;
+    else if (keypad[14])
+       registers[14] = 14;
+    else if (keypad[15])
+       registers[15] = 15;
+    else
+        pc -= 2;
+}
+
+void Chip8::OpFx15()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    delayTimer = registers[Vx];
+}
+
+void Chip8::OpFx18()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    soundTimer = registers[Vx];
+}
+
+void Chip8::OpFx1E()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    index += registers[Vx];
+}
+
+void Chip8::OpFx29()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    const unsigned char symbol = registers[Vx];
+
+    index = FontsetStartAddress + 5 * symbol;
+}
+
+void Chip8::OpFx33()
+{
+    const unsigned char Vx = (opcode & 0x0F00u) >> 8u;
+    unsigned char value = registers[Vx];
+
+    memory[index + 2] = value % 10;
+    value /= 10;
+
+    memory[index + 1] = value % 10;
+    value /= 10;
+
+    memory[index] = value % 10;
+}
+
+void Chip8::OpFx55()
+{
+    const unsigned short Vx = (opcode & 0x0F00u) >> 8u;
+    for (unsigned short i = 0; i <= Vx; ++i)
+    {
+        memory[index + i] = registers[i];
+    }
+}
+
+void Chip8::OpFx65()
+{
+    const unsigned short Vx = (opcode & 0x0F00u) >> 8u;
+    for (unsigned short i = 0; i <= Vx; ++i)
+    {
+        registers[i] = memory[index + i];
+    }
+}
+
+void Chip8::Table0()
+{
+    (this->*(table0[opcode & 0x000Fu]))();
+}
+
+void Chip8::Table8()
+{
+    (this->*(table8[opcode & 0x000Fu]))();
+}
+
+void Chip8::TableE()
+{
+    (this->*(tableE[opcode & 0x000Fu]))();
+}
+
+void Chip8::TableF()
+{
+    (this->*(tableF[opcode & 0x00FFu]))();
 }
 
 } // namespace Chip8

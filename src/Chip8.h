@@ -7,7 +7,7 @@ constexpr unsigned int startAddress = 0x200; // Usable memory address starts onl
 constexpr unsigned char VideoWidth = 64u;
 constexpr unsigned char VideoHeight = 32u;
 
-class Chip8
+class Chip8 final
 {
 public:
     Chip8();
@@ -44,7 +44,25 @@ private:
     void OpBnnn(); // Jump to location nnn + V0;
     void OpCxkk(); // Set register Vx to random byte and kk.
     void OpDxyn(); // Draw n-byte sprite starting at memory (Vx, Vy). Set flag register to possible collisiion.
+    void OpEx9E(); // Skip next instruction if key with the value of register Vx is pressed.
+    void OpExA1(); // Skip next instruction if key with the value of register Vx is not pressed.
+    void OpFx07(); // Set value of register Vx to delay timer.
+    void OpFx0A(); // Wait for the key press and store key index into the register Vx.
+    void OpFx15(); // Set the delay timer to value of the register Vx.
+    void OpFx18(); // Set the sound timer to value of the register Vx.
+    void OpFx1E(); // Increment index by the value of the register Vx.
+    void OpFx29(); // Set index to location of sprite for symbol stored in register Vx.
+    void OpFx33(); // Takes the value from register Vx and places it into the memory in such way: stores hundreds at location "index", tens - "index + 1", digits - "Index + 2".
+    void OpFx55(); // Stores the registers from V0 to Vx into the memory starting at location "index";
+    void OpFx65(); // Loads the registers from V0 to Vx from the memory starting at location "index".
+    void OpNull(); // Dummy instruction in case if the opcode is wrong.
 
+    // Redirection tables
+    void Table0();
+    void Table8();
+    void TableE();
+    void TableF();
+    
 private:
     unsigned char registers[16];
     unsigned char memory[4096];
@@ -57,6 +75,14 @@ private:
     unsigned short stack[16];
     unsigned short opcode = 0;
     unsigned int videoMemory[VideoWidth * VideoHeight];
+
+// Instead of having huge switch, we are going to implement functio table, so the opcode could lead into the function (through the indirection though.).
+using Chip8Func = void(Chip8::*)();
+    Chip8Func table[0xF + 1]{&Chip8::OpNull};
+    Chip8Func table0[0xE + 1]{&Chip8::OpNull};
+    Chip8Func table8[0xE + 1]{&Chip8::OpNull};
+    Chip8Func tableE[0xE + 1]{&Chip8::OpNull};
+    Chip8Func tableF[0x65 + 1]{&Chip8::OpNull};
 };
 
 } // namespace Chip8;
