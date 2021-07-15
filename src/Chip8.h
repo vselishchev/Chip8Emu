@@ -1,9 +1,10 @@
 #pragma once
 
-namespace Chip8
+namespace Chip8Emu
 {
 
-constexpr unsigned int startAddress = 0x200; // Usable memory address starts only from 0x200.
+constexpr unsigned int StartAddress = 0x200; // Usable memory address starts only from 0x200.
+constexpr unsigned int MemorySize = 4096;
 constexpr unsigned char VideoWidth = 64u;
 constexpr unsigned char VideoHeight = 32u;
 
@@ -18,6 +19,10 @@ public:
     Chip8& operator=(const Chip8&&) = delete;
 
     void LoadROM(const char* filename);
+    void Cycle();
+
+    unsigned char* GetKeyPad();
+    const unsigned int* GetVideoMemory() const;
 
 private:
     // Instructions
@@ -55,23 +60,23 @@ private:
     void OpFx33(); // Takes the value from register Vx and places it into the memory in such way: stores hundreds at location "index", tens - "index + 1", digits - "Index + 2".
     void OpFx55(); // Stores the registers from V0 to Vx into the memory starting at location "index";
     void OpFx65(); // Loads the registers from V0 to Vx from the memory starting at location "index".
-    void OpNull(); // Dummy instruction in case if the opcode is wrong.
+    void OpNull(){} // Dummy instruction in case if the opcode is wrong.
 
     // Redirection tables
     void Table0();
     void Table8();
     void TableE();
     void TableF();
-    
+
 private:
     unsigned char registers[16];
-    unsigned char memory[4096];
+    unsigned char memory[MemorySize];
     unsigned char sp = 0; // Stack pointer;
     unsigned char delayTimer = 0;
     unsigned char soundTimer = 0;
     unsigned char keypad[16];
     unsigned short index = 0;
-    unsigned short pc = startAddress; // Program counter
+    unsigned short pc = StartAddress; // Program counter
     unsigned short stack[16];
     unsigned short opcode = 0;
     unsigned int videoMemory[VideoWidth * VideoHeight];
@@ -85,4 +90,4 @@ using Chip8Func = void(Chip8::*)();
     Chip8Func tableF[0x65 + 1]{&Chip8::OpNull};
 };
 
-} // namespace Chip8;
+} // namespace Chip8Emu

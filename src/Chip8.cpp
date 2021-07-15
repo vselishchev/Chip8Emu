@@ -6,7 +6,7 @@
 #include <chrono>
 #include <random>
 
-namespace Chip8
+namespace Chip8Emu
 {
 
 constexpr unsigned int FontsetStartAddress = 50;
@@ -67,6 +67,19 @@ Chip8::Chip8()
     table8[0x6] = &Chip8::Op8xy6;
     table8[0x7] = &Chip8::Op8xy7;
     table8[0xE] = &Chip8::Op8xyE;
+
+    tableE[0x1] = &Chip8::OpExA1;
+    tableE[0xE] = &Chip8::OpEx9E;
+
+    tableF[0x07] = &Chip8::OpFx07;
+    tableF[0x0A] = &Chip8::OpFx0A;
+    tableF[0x15] = &Chip8::OpFx15;
+    tableF[0x18] = &Chip8::OpFx18;
+    tableF[0x1E] = &Chip8::OpFx1E;
+    tableF[0x29] = &Chip8::OpFx29;
+    tableF[0x33] = &Chip8::OpFx33;
+    tableF[0x55] = &Chip8::OpFx55;
+    tableF[0x65] = &Chip8::OpFx65;
 }
 
 void Chip8::LoadROM(const char* filename)
@@ -79,13 +92,41 @@ void Chip8::LoadROM(const char* filename)
 
     const std::streampos size = file.tellg();
     std::vector<char> romBuffer;
-    romBuffer.reserve(size);
+    romBuffer.resize(size);
 
     file.seekg(0, std::ios::beg);
     file.read(romBuffer.data(), size);
     file.close();
 
-    std::memcpy(memory + startAddress, romBuffer.data(), size);
+    std::memcpy(memory + StartAddress, romBuffer.data(), size);
+}
+
+void Chip8::Cycle()
+{
+    opcode = (memory[pc] << 8u) | memory[pc + 1];
+    pc += 2;
+
+    (this->*(table[(opcode & 0xF000u) >> 12u]))();
+
+    if (delayTimer > 0)
+    {
+        --delayTimer;
+    }
+
+    if (soundTimer > 0)
+    {
+        --soundTimer;
+    }
+}
+
+unsigned char* Chip8::GetKeyPad()
+{
+    return keypad;
+}
+
+const unsigned int* Chip8::GetVideoMemory() const
+{
+    return videoMemory;
 }
 
 void Chip8::Op00E0() 
@@ -299,7 +340,7 @@ void Chip8::OpDxyn()
         for (unsigned int column = 0; column < 8; ++column)
         {
             const unsigned char spritePixel = spriteByte & (0x80u >> column);
-            unsigned int& screenPixel = videoMemory[(yPos + row) * VideoWidth + (xPos + column) * VideoHeight];
+            unsigned int& screenPixel = videoMemory[(yPos + row) * VideoWidth + (xPos + column)];
             if (spritePixel)
             {
                 if (screenPixel == 0xFFFFFFFFu) // if screen pixel is already on, set collision flag to 1;
@@ -458,4 +499,4 @@ void Chip8::TableF()
     (this->*(tableF[opcode & 0x00FFu]))();
 }
 
-} // namespace Chip8
+} // namespace Chip8Emu 

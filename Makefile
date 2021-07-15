@@ -3,8 +3,9 @@ CXX_FLAGS := -std=c++17 -O0 -ggdb
 
 BIN := bin
 SRC := src
+INCLUDE := /usr/include/SDL2
 
-LIBRARIES := 
+LIBRARIES := SDL2
 EXECUTABLE := Chip8Emu
 
 all: $(BIN)/$(EXECUTABLE)
@@ -14,7 +15,7 @@ run: clean all
 	./$(BIN)/$(EXECUTABLE)
 
 $(BIN)/$(EXECUTABLE): $(SRC)/*.cpp
-	$(CXX) $(CXX_FLAGS) -I$(SRC) $^ -o $@ $(LIBRARIES)
+	$(CXX) $(CXX_FLAGS) -I$(INCLUDE) $^ -o $@ -l$(LIBRARIES)
 
 clean:
 	-rm $(BIN)/*
