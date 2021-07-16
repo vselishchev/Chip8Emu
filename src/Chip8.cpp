@@ -9,7 +9,7 @@
 namespace Chip8Emu
 {
 
-constexpr unsigned int FontsetStartAddress = 50;
+constexpr unsigned int FontsetStartAddress = 0x50;
 
 Chip8::Chip8()
 {
@@ -340,9 +340,9 @@ void Chip8::OpDxyn()
         for (unsigned int column = 0; column < 8; ++column)
         {
             const unsigned char spritePixel = spriteByte & (0x80u >> column);
-            unsigned int& screenPixel = videoMemory[(yPos + row) * VideoWidth + (xPos + column)];
             if (spritePixel)
             {
+                unsigned int& screenPixel = videoMemory[(yPos + row) * VideoWidth + (xPos + column)];
                 if (screenPixel == 0xFFFFFFFFu) // if screen pixel is already on, set collision flag to 1;
                 {
                     registers[0xF] = 1;

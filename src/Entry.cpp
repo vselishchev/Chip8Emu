@@ -13,8 +13,8 @@ int main(int argc, char* argv[])
     }
 
     const char* romPath = argv[1];
-    const int scale  = argc > 2 ? std::stoi(argv[2]) : 3;
-    const float frameTime = argc > 3 ? std::stof(argv[3]) : 16.6;
+    const int scale  = argc > 2 ? std::stoi(argv[2]) : 10;
+    const float frameTime = argc > 3 ? std::stof(argv[3]) : 3;
 
     Chip8Emu::ApiLayer apiLayer("Chip8 Emulator", 
         Chip8Emu::VideoWidth * scale, Chip8Emu::VideoHeight * scale,

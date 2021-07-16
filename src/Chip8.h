@@ -79,7 +79,7 @@ private:
     unsigned short pc = StartAddress; // Program counter
     unsigned short stack[16];
     unsigned short opcode = 0;
-    unsigned int videoMemory[VideoWidth * VideoHeight];
+    unsigned int videoMemory[VideoWidth * VideoHeight]{};
 
 // Instead of having huge switch, we are going to implement functio table, so the opcode could lead into the function (through the indirection though.).
 using Chip8Func = void(Chip8::*)();

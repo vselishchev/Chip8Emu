@@ -18,9 +18,9 @@ public:
     bool ProcessInput(unsigned char* keys);
 
 private:
-    SDL_Window* window = nullptr;
+    SDL_Window*   window = nullptr;
     SDL_Renderer* renderer = nullptr;
-    SDL_Texture* texture = nullptr;
+    SDL_Texture*  texture = nullptr;
 };
 
 } // namespace Chip8Emu
