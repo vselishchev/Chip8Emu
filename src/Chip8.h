@@ -69,25 +69,25 @@ private:
     void TableF();
 
 private:
-    unsigned char registers[16];
-    unsigned char memory[MemorySize];
+    unsigned char registers[16]{};
+    unsigned char memory[MemorySize]{};
     unsigned char sp = 0; // Stack pointer;
     unsigned char delayTimer = 0;
     unsigned char soundTimer = 0;
-    unsigned char keypad[16];
+    unsigned char keypad[16]{};
     unsigned short index = 0;
     unsigned short pc = StartAddress; // Program counter
-    unsigned short stack[16];
+    unsigned short stack[16]{};
     unsigned short opcode = 0;
     unsigned int videoMemory[VideoWidth * VideoHeight]{};
 
 // Instead of having huge switch, we are going to implement functio table, so the opcode could lead into the function (through the indirection though.).
 using Chip8Func = void(Chip8::*)();
-    Chip8Func table[0xF + 1]{&Chip8::OpNull};
-    Chip8Func table0[0xE + 1]{&Chip8::OpNull};
-    Chip8Func table8[0xE + 1]{&Chip8::OpNull};
-    Chip8Func tableE[0xE + 1]{&Chip8::OpNull};
-    Chip8Func tableF[0x65 + 1]{&Chip8::OpNull};
+    Chip8Func table[0xF + 1];
+    Chip8Func table0[0xF];
+    Chip8Func table8[0xF];
+    Chip8Func tableE[0xF];
+    Chip8Func tableF[0x66];
 };
 
 } // namespace Chip8Emu

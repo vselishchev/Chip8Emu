@@ -5,6 +5,8 @@
 #include <cstring>
 #include <chrono>
 #include <random>
+#include <algorithm>
+#include <iostream>
 
 namespace Chip8Emu
 {
@@ -55,9 +57,11 @@ Chip8::Chip8()
     table[0xE] = &Chip8::TableE;
     table[0xF] = &Chip8::TableF;
 
+    std::fill_n(table0, 0xF, &Chip8::OpNull);
     table0[0x0] = &Chip8::Op00E0;
     table0[0xE] = &Chip8::Op00EE;
 
+    std::fill_n(table8, 0xF, &Chip8::OpNull);
     table8[0x0] = &Chip8::Op8xy0;
     table8[0x1] = &Chip8::Op8xy1;
     table8[0x2] = &Chip8::Op8xy2;
@@ -68,9 +72,11 @@ Chip8::Chip8()
     table8[0x7] = &Chip8::Op8xy7;
     table8[0xE] = &Chip8::Op8xyE;
 
+    std::fill_n(tableE, 0xF, &Chip8::OpNull);
     tableE[0x1] = &Chip8::OpExA1;
     tableE[0xE] = &Chip8::OpEx9E;
 
+    std::fill_n(tableF, 0x66, &Chip8::OpNull);
     tableF[0x07] = &Chip8::OpFx07;
     tableF[0x0A] = &Chip8::OpFx0A;
     tableF[0x15] = &Chip8::OpFx15;
@@ -337,12 +343,14 @@ void Chip8::OpDxyn()
     for (unsigned int row = 0; row < height; ++row)
     {
         const unsigned char spriteByte = memory[index + row];
+        const unsigned char wrappedYPos = (yPos + row) % VideoHeight; // Wrap sprite around the corner if reaches the end.
         for (unsigned int column = 0; column < 8; ++column)
         {
             const unsigned char spritePixel = spriteByte & (0x80u >> column);
             if (spritePixel)
             {
-                unsigned int& screenPixel = videoMemory[(yPos + row) * VideoWidth + (xPos + column)];
+                const unsigned char wrappedXPos = (xPos + column) % VideoWidth; // Wrap sprite around the corner if reaches the end.
+                unsigned int& screenPixel = videoMemory[wrappedYPos * VideoWidth + wrappedXPos];
                 if (screenPixel == 0xFFFFFFFFu) // if screen pixel is already on, set collision flag to 1;
                 {
                     registers[0xF] = 1;
