@@ -6,7 +6,6 @@
 #include <chrono>
 #include <random>
 #include <algorithm>
-#include <iostream>
 
 namespace Chip8Emu
 {
